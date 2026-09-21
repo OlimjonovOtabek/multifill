@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Multifill Test Page</title>
+  <style>
+    body { font-family: system-ui; max-width: 600px; margin: 40px auto; padding: 20px; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-weight: bold; margin-bottom: 6px; }
+    input, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    textarea { height: 80px; resize: vertical; }
+  </style>
+</head>
+<body>
+  <h1>Multifill Test Page</h1>
+  <p>Load the extension in Chrome and this page will automatically show the translation buttons.</p>
+
+  <div class="card">
+    <h2>Explicit Grouping (data-translate)</h2>
+    <div class="form-group">
+      <label>Title (English)</label>
+      <input type="text" data-translate="en" data-formlingo-field="title" placeholder="Type in English...">
+    </div>
+    <div class="form-group">
+      <label>Title (Russian)</label>
+      <input type="text" data-translate="ru" data-formlingo-field="title" placeholder="Type in Russian...">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Inferred Grouping (name pattern)</h2>
+    <div class="form-group">
+      <label>Description (Uzbek Latin)</label>
+      <textarea name="description_uz-Latn" placeholder="Type in Uzbek..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Description (Karakalpak)</label>
+      <textarea name="description_kaa" placeholder="Type in Karakalpak..."></textarea>
+    </div>
+  </div>
+  
+  <p style="margin-top: 100vh; padding-bottom: 20px;">Scroll down to test that buttons track elements correctly!</p>
+</body>
+</html>

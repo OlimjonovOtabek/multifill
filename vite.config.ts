@@ -1,0 +1,33 @@
+import { defineConfig } from 'vite';
+import { crx, defineManifest } from '@crxjs/vite-plugin';
+
+const manifest = defineManifest({
+  manifest_version: 3,
+  name: "Multifill",
+  version: "0.1.0",
+  description: "Fill every language field of a form from one click.",
+  action: {
+    default_popup: "src/popup/index.html"
+  },
+  background: {
+    service_worker: "src/background/index.ts",
+    type: "module"
+  },
+  content_scripts: [
+    {
+      matches: ["<all_urls>"],
+      js: ["src/content/index.ts"]
+    }
+  ],
+  options_ui: {
+    page: "src/options/index.html",
+    open_in_tab: true
+  },
+  permissions: ["storage"]
+});
+
+export default defineConfig({
+  plugins: [
+    crx({ manifest })
+  ]
+});
