@@ -50,7 +50,7 @@ Translation is behind a provider interface, chosen in the options page:
 | Built-in (no key) | no | no | no |
 | DeepL | your key | no | partly |
 | Google Cloud Translation | your key | no | no |
-| LLM (Claude and compatible) | your key | yes | yes |
+| LLM (bring your own) | your key | yes | yes |
 | from-to.uz | no | no | no |
 
 The built-in provider is the default so the extension works the moment it is
