@@ -2,47 +2,163 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Multifill</title>
+  <title>Multifill - AI Form Translator</title>
   <style>
+    :root {
+      --primary: #0ea5e9;
+      --primary-hover: #0284c7;
+      --bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 8px;
+    }
+
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      width: 260px;
-      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      width: 300px;
       margin: 0;
-      color: #333;
+      background-color: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
     }
-    h2 { 
-      margin: 0 0 8px 0; 
-      font-size: 18px; 
-      font-weight: 600;
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
     }
-    p { 
-      margin: 0 0 16px 0; 
-      font-size: 13px; 
-      color: #555; 
-      line-height: 1.4; 
+
+    .header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    button {
-      background: #0066ff;
+
+    .header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .header .version {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .content p {
+      margin: 0 0 16px 0;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .features {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+    }
+
+    .features li {
+      font-size: 13px;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .features li::before {
+      content: "✓";
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    .btn {
+      background: var(--primary);
       color: white;
       border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 10px 16px;
+      border-radius: var(--radius);
       width: 100%;
       cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      transition: background 0.2s;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    button:hover { 
-      background: #005ce6; 
+
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    
+    .btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .footer {
+      padding: 12px 20px;
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      text-align: center;
+      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
-  <h2>Multifill</h2>
-  <p>Fill every language field of a form from one click. Translation buttons will automatically appear next to compatible input fields on the page.</p>
-  <button id="optionsBtn">Open Settings</button>
+  
+  <div class="header">
+    <img src="/logo.jpg" alt="Multifill Logo">
+    <div>
+      <h2>Multifill</h2>
+      <span class="version">v0.1.0</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <p>Automatically fill multilingual forms with a single click using AI and Neural translation engines.</p>
+    
+    <ul class="features">
+      <li>Auto-detects language fields</li>
+      <li>One-click instant translation</li>
+      <li>Supports from-to.uz API</li>
+    </ul>
+
+    <button class="btn" id="optionsBtn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+      Configure API Settings
+    </button>
+  </div>
+
+  <div class="footer">
+    Translating <b>Karakalpak</b> & <b>Uzbek</b>
+  </div>
+
   <script type="module" src="./index.ts"></script>
 </body>
 </html>
