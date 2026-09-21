@@ -7,7 +7,7 @@ const statusMsg = document.getElementById('status') as HTMLDivElement;
 const keyGroup = document.getElementById('keyGroup') as HTMLDivElement;
 const keyHelp = document.getElementById('keyHelp') as HTMLDivElement;
 
-const PROVIDERS_REQUIRING_KEYS = ['deepl', 'google', 'llm'];
+const PROVIDERS_REQUIRING_KEYS = ['deepl', 'google', 'llm', 'from-to'];
 
 /**
  * Toggles the API key field based on whether the selected provider requires one.
