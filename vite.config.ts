@@ -10,9 +10,9 @@ const manifest = defineManifest({
     default_popup: "src/popup/index.html"
   },
   icons: {
-    "16": "logo.jpg",
-    "48": "logo.jpg",
-    "128": "logo.jpg"
+    "16": "logo.png",
+    "48": "logo.png",
+    "128": "logo.png"
   },
   background: {
     service_worker: "src/background/index.ts",
