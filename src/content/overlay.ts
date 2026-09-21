@@ -9,7 +9,7 @@ export class OverlayManager {
   constructor() {
     this.container = document.createElement('div');
     this.container.id = 'multifill-overlay-root';
-    this.container.style.position = 'absolute';
+    this.container.style.position = 'fixed';
     this.container.style.top = '0';
     this.container.style.left = '0';
     this.container.style.width = '100%';
@@ -139,9 +139,9 @@ export class OverlayManager {
       
       btn.style.display = 'flex';
       
-      // Position inside the right edge of the input
-      const top = rect.top + window.scrollY + (rect.height / 2) - 12; // 12 = half of button height
-      const left = rect.right + window.scrollX - 32; // 32px padding from right edge
+      // Position inside the right edge of the input using fixed coordinates
+      const top = rect.top + (rect.height / 2) - 12; // 12 = half of button height
+      const left = rect.right - 32; // 32px padding from right edge
       
       btn.style.top = `${top}px`;
       btn.style.left = `${left}px`;

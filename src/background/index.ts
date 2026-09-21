@@ -1,6 +1,9 @@
 // Simple built-in translator using Google Translate free endpoint
 async function translateText(text: string, sourceLang: string, targetLang: string): Promise<string> {
-  const tl = targetLang.split('-')[0]; // simplify uz-Latn to uz for google translate
+  let tl = targetLang.split('-')[0]; // simplify uz-Latn to uz for google translate
+  if (tl === 'kaa') {
+    tl = 'uz'; // Fallback for Karakalpak since Google Translate doesn't support it
+  }
   const sl = sourceLang.split('-')[0];
   const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${tl}&dt=t&q=${encodeURIComponent(text)}`;
   const response = await fetch(url);
