@@ -84,9 +84,9 @@ export function normalizeTag(raw: string): LangTag {
   const direct = ALIASES[trimmed] ?? ALIASES[trimmed.toLowerCase()];
   if (direct) return direct;
   // Canonicalise casing: "UZ-latn" -> "uz-Latn", "EN" -> "en".
-  const [lang, ...rest] = trimmed.split('-');
+  const [lang = '', ...rest] = trimmed.split('-');
   const script = rest.map((p) =>
-    p.length === 4 ? p[0].toUpperCase() + p.slice(1).toLowerCase() : p.toUpperCase(),
+    p.length === 4 ? p.charAt(0).toUpperCase() + p.slice(1).toLowerCase() : p.toUpperCase(),
   );
   return [lang.toLowerCase(), ...script].join('-');
 }
