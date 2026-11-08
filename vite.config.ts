@@ -4,7 +4,7 @@ import { crx, defineManifest } from '@crxjs/vite-plugin';
 const manifest = defineManifest({
   manifest_version: 3,
   name: "Multifill",
-  version: "0.1.0",
+  version: "0.1.1",
   description: "Fill every language field of a form from one click.",
   action: {
     default_popup: "src/popup/index.html"
