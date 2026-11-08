@@ -1,15 +1,68 @@
 import type { FieldGroup } from './discovery';
+import { intersect, placeButton, type Box, type Placement } from './geometry';
+
+/**
+ * Number of animation frames without any button moving before the position
+ * sync loop stops. Dialog open animations, CSS transitions and scroll
+ * momentum all move fields without firing ResizeObserver, so positions are
+ * re-measured every frame until the layout settles.
+ */
+const STABLE_FRAMES_TO_STOP = 10;
+
+const LAYOUT_EVENTS = ['transitionrun', 'transitionend', 'animationstart', 'animationend'] as const;
+
+function composedParent(node: Element): Element | null {
+  if (node.parentElement) return node.parentElement;
+  const root = node.getRootNode();
+  return root instanceof ShadowRoot ? root.host : null;
+}
+
+function composedContains(ancestor: Element, node: Element): boolean {
+  for (let current: Element | null = node; current; current = composedParent(current)) {
+    if (current === ancestor) return true;
+  }
+  return false;
+}
+
+function viewportBox(): Box {
+  return { top: 0, left: 0, right: window.innerWidth, bottom: window.innerHeight };
+}
+
+function clientBox(el: Element): Box {
+  const rect = el.getBoundingClientRect();
+  const top = rect.top + el.clientTop;
+  const left = rect.left + el.clientLeft;
+  return { top, left, right: left + el.clientWidth, bottom: top + el.clientHeight };
+}
+
+/** The part of the viewport where `el` is not cut off by a scrolling or clipping ancestor. */
+function visibleBox(el: Element): Box | null {
+  let visible: Box | null = viewportBox();
+  let node = composedParent(el);
+  while (node && visible && node !== document.body && node !== document.documentElement) {
+    const style = getComputedStyle(node);
+    if (style.overflowX !== 'visible' || style.overflowY !== 'visible') {
+      visible = intersect(visible, clientBox(node));
+    }
+    if (style.position === 'fixed') break;
+    node = composedParent(node);
+  }
+  return visible;
+}
 
 export class OverlayManager {
   private container: HTMLDivElement;
   private shadow: ShadowRoot;
   private buttons = new Map<HTMLElement, HTMLButtonElement>();
   private resizeObserver: ResizeObserver;
+  private frame = 0;
+  private stableFrames = 0;
+  private lastLayout = '';
 
   constructor() {
     this.container = document.createElement('div');
     this.container.id = 'multifill-overlay-root';
-    this.container.style.position = 'absolute';
+    this.container.style.position = 'fixed';
     this.container.style.top = '0';
     this.container.style.left = '0';
     this.container.style.width = '100%';
@@ -34,7 +87,7 @@ export class OverlayManager {
         justify-content: center;
         cursor: pointer;
         color: #475569;
-        transition: all 0.2s;
+        transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
       }
       .mf-btn:hover {
@@ -62,11 +115,14 @@ export class OverlayManager {
       document.addEventListener('DOMContentLoaded', () => document.body.appendChild(this.container));
     }
 
-    this.resizeObserver = new ResizeObserver(() => this.updatePositions());
-    
+    this.resizeObserver = new ResizeObserver(this.scheduleSync);
+
     // Capture scroll events on any scrolling container
-    window.addEventListener('scroll', () => this.updatePositions(), { passive: true, capture: true });
-    window.addEventListener('resize', () => this.updatePositions(), { passive: true });
+    window.addEventListener('scroll', this.scheduleSync, { passive: true, capture: true });
+    window.addEventListener('resize', this.scheduleSync, { passive: true });
+    for (const type of LAYOUT_EVENTS) {
+      document.addEventListener(type, this.scheduleSync, { passive: true, capture: true });
+    }
   }
 
   public render(groups: FieldGroup[], onTranslate: (el: HTMLElement, lang: string, group: string) => void) {
@@ -99,7 +155,7 @@ export class OverlayManager {
       }
     }
 
-    this.updatePositions();
+    this.scheduleSync();
   }
 
   public setButtonLoading(el: HTMLElement, isLoading: boolean) {
@@ -128,24 +184,58 @@ export class OverlayManager {
     return btn;
   }
 
-  private updatePositions() {
+  private readonly scheduleSync = () => {
+    this.stableFrames = 0;
+    if (!this.frame) this.frame = requestAnimationFrame(this.syncFrame);
+  };
+
+  private readonly syncFrame = () => {
+    this.frame = 0;
+    const layout = this.updatePositions();
+    this.stableFrames = layout === this.lastLayout ? this.stableFrames + 1 : 0;
+    this.lastLayout = layout;
+    if (this.stableFrames < STABLE_FRAMES_TO_STOP) {
+      this.frame = requestAnimationFrame(this.syncFrame);
+    }
+  };
+
+  /** Positions every button and returns a fingerprint of the layout, used to detect when it settles. */
+  private updatePositions(): string {
+    const layout: string[] = [];
     for (const [el, btn] of this.buttons.entries()) {
-      const rect = el.getBoundingClientRect();
-      
-      if (rect.width === 0 || rect.height === 0 || !document.contains(el)) {
+      const placement = this.placementFor(el);
+      if (!placement) {
         btn.style.display = 'none';
+        layout.push('-');
         continue;
       }
-      
+
+      const { top, left, clip } = placement;
       btn.style.display = 'flex';
-      
-      // Position inside the right edge of the input
-      const top = rect.top + window.scrollY + (rect.height / 2) - 12; // 12 = half of button height
-      const left = rect.right + window.scrollX - 32; // 32px padding from right edge
-      
       btn.style.top = `${top}px`;
       btn.style.left = `${left}px`;
+      btn.style.clipPath = `inset(${clip.top}px ${clip.right}px ${clip.bottom}px ${clip.left}px)`;
+      layout.push(`${top},${left},${clip.top},${clip.right},${clip.bottom},${clip.left}`);
     }
+    return layout.join('|');
+  }
+
+  private placementFor(el: HTMLElement): Placement | null {
+    if (!el.isConnected) return null;
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return null;
+
+    const visible = visibleBox(el);
+    const placement = visible && placeButton(rect, visible);
+    if (!placement || this.isCovered(el, placement.probe)) return null;
+    return placement;
+  }
+
+  /** True when something else, such as a modal mask or a dropdown, is drawn over the field. */
+  private isCovered(el: HTMLElement, point: { x: number; y: number }): boolean {
+    const hit = document.elementsFromPoint(point.x, point.y).find((node) => node !== this.container);
+    if (!hit) return true;
+    return !composedContains(el, hit) && !composedContains(hit, el);
   }
 }
 
