@@ -1,6 +1,6 @@
 {
   "name": "multifill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fill every language field of a form from one click. Chrome extension for multilingual admin panels and CMS forms.",
   "private": true,
   "type": "module",
